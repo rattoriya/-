@@ -1,0 +1,308 @@
+# include <stdio.h>
+# include <stdlib.h>
+#include <locale.h>
+
+struct chitatel
+{
+	char fam[30];
+	char name[20];
+	char otch[30];
+	int nomer;
+	char nazv[50];
+	int month, year;
+	struct chitatel* next;
+};
+typedef struct chitatel chitatelNode;
+typedef chitatelNode * chitatelNodePtr;
+int insert(chitatelNodePtr*);
+int del(chitatelNodePtr*, int);
+int IsEmpty(chitatelNodePtr);
+void printList(chitatelNodePtr);
+void instructions(void);
+void countList(chitatelNodePtr);
+void findMax(chitatelNodePtr);
+void findMin(chitatelNodePtr);
+int deletall(chitatelNodePtr*, int);
+void kill(chitatelNodePtr);
+
+int main()
+{
+	setlocale(LC_ALL, "Rus");
+	chitatelNodePtr start = NULL;
+	int choice;
+	int d;
+	instructions();           		 
+	printf("?");
+	scanf_s("%d", &choice);
+	while (choice != 8)
+	{
+		switch (choice)
+		{
+		case 1:                       
+			insert(&start);
+			printList(start);
+			break;
+		case 2:                       
+			if (!IsEmpty(start))
+			{
+				printf("Введите номер читательского билета для удаления:");
+				int elem;
+				scanf_s("\n%d", &elem);
+				if (del(&start, elem))
+				{
+					printf("%d удален.\n", elem);
+					printList(start);
+				}
+				else
+					printf("%d не найден.\n", elem);
+			}
+			else
+				printf("List is empty.\n");
+			break;
+		case 3: countList(start);
+			break;
+		case 4: findMax(start);
+			break;
+		case 5: findMin(start);
+			break;
+		case 6: 
+			if (!IsEmpty(start))
+			{
+				printf("Введите номер читательского билета для удаления:");
+				scanf_s("\n%d", &d);
+				if (deletall(&start, d)) {
+
+					printf("%d удален.\n", d);
+					printList(start);
+				}
+				else printf("Не найден.\n");
+			}
+			else printf("List is empty.\n");
+			break;
+		case 7: kill(&start);
+			if (!IsEmpty(start))
+			{
+				printList(start);
+			}
+			else printf("List is empty.\n");
+			break;
+
+		default:
+			printf("Неверное число.\n");
+			instructions();
+			break;
+		}
+		printf("?");
+		scanf_s("%d", &choice);
+	}
+	printf("Конец.\n");
+	return 0;
+}
+
+void instructions(void)
+{
+	printf("Введите выбор:\n"
+		"1  добавить элемент в список.\n"
+		"2  удалить элемент из списка.\n"
+		"3  посчитать элементы списка.\n"
+		"4  найти максимальный элемент списка.\n"
+		"5  найти минимальный элемент списка.\n"
+		"6  удалить все элементы с данным номером.\n"
+		"7  очистить список.\n"
+		"8  завершить программу.\n");
+}
+
+int insert(chitatelNodePtr* s)
+{
+	chitatelNodePtr newP, previous, current;
+	newP = (chitatelNodePtr)malloc(sizeof(chitatelNode));
+	if (newP != NULL)
+	{
+		puts("Введите фамилию: ");
+		fflush(stdin);
+		getchar();
+		gets(newP->fam);
+
+		puts("Введите имя: ");
+		fflush(stdin);
+		gets(newP->name);
+
+		puts("Введите отчество: ");
+		fflush(stdin);
+		gets(newP->otch);
+
+		puts("Введите номер билета: ");
+		scanf_s("%d", &newP->nomer);
+
+		if (newP->nomer >= 10000) { printf("Неверный номер билета. Информация о читателе не сохранилась\n"); return 0; }
+		else {
+
+			puts("Введите название книги: ");
+			fflush(stdin);
+			getchar();
+			gets(newP->nazv);
+
+			puts("Введите месяц срока сдачи книги: ");
+			scanf_s("%d", &newP->month);
+
+			if (newP->month > 12 || newP->month <= 0) { printf("Неверное число месяцев. Информация о читателе не сохранилась\n"); return 0; }
+			else {
+				puts("Введите год срока сдачи  книги: ");
+				scanf_s("%d", &newP->year);
+
+				if (newP->year > 2024 || newP->year <= 2021) { printf("Неверный год. Информация о читателе не сохранилась\n"); return 0; }
+				else {
+
+					newP->next = NULL;
+					previous = NULL;
+					current = *s;
+				
+						newP->next = *s;
+						*s = newP;
+						return 0;
+					
+				}
+			}
+		}
+	}
+	else
+	{
+		printf("Нет доступной памяти.\n"); return 0;
+	}
+}
+
+int del(chitatelNodePtr* s, int value)
+{
+	chitatelNodePtr previous, current, temp;
+	if (value == (*s)->nomer)
+	{
+		temp = *s;
+		*s = (*s)->next;  
+		free(temp);      
+		return value;
+	}
+	else
+	{
+		previous = *s;
+		current = (*s)->next;
+		while (current != NULL && current->nomer != value)
+		{
+			previous = current;           
+			current = current->next;     
+		}
+		if (current != NULL)
+		{
+			temp = current;
+			previous->next = current->next;
+			free(temp);
+			return value;
+		}
+	}
+	return '\0';
+}
+
+int IsEmpty(chitatelNodePtr s)
+{
+	return s == NULL;
+}
+
+void printList(chitatelNodePtr current)
+{
+	if (current == NULL)
+		printf("The list is empty.\n");
+	else
+	{
+		printf("Список :\n");
+		while (current != NULL)
+		{
+			printf("ЧИТАТЕЛЬ: %s %s %s, НОМЕР БИЛЕТА: %d, НАЗВАНИЕ КНИГИ: %s, СРОК СДАЧИ: %d.%d\n", current->fam, current->name, current->otch, current->nomer, current->nazv, current->month, current->year);
+			current = current->next;
+		}
+		printf("-->NULL\n");
+	}
+}
+
+void countList(chitatelNodePtr current) {
+	if (current == NULL)
+		printf("The list is empty.\n");
+	else {
+		int i = 0;
+		int amount;
+		while (current != NULL)
+		{
+			i++;
+			current = current->next;
+			amount = i;
+		}
+		printf("Количество элементов списка: %d\n\n", amount);
+	}
+}
+
+void findMax(chitatelNodePtr current) {
+	if (current == NULL)
+		printf("The list is empty.\n");
+	else {
+		int max = current->nomer;
+		while (current != NULL) {
+			if (current->nomer > max) { max = current->nomer; }
+			current = current->next;
+		}
+		printf("Максимальный номер билета: %d\n\n", max);
+	}
+}
+
+void findMin(chitatelNodePtr current) {
+	if (current == NULL)
+		printf("The list is empty.\n");
+	else {
+		int min = current->nomer;
+		while (current != NULL) {
+			if (current->nomer < min) { min = current->nomer; }
+			current = current->next;
+		}
+		printf("Минимальный номер билета: %d\n\n", min);
+	}
+}
+
+int deletall(chitatelNodePtr* s,int value) {
+
+	chitatelNodePtr previous, current, temp;
+	while (1) {
+		if (value == (*s)->nomer)
+		{
+			temp = *s;
+			*s = (*s)->next;  
+			free(temp);      
+		}
+		else
+		{
+			previous = *s;
+			current = (*s)->next;
+			while (current != NULL && current->nomer != value)
+			{
+				previous = current;          
+				current = current->next;     
+			}
+			if (current != NULL)
+			{
+				temp = current;
+				previous->next = current->next;
+				free(temp);
+			}
+			if (current == NULL) {
+					return 1;
+			}
+		}
+	}
+}
+
+void kill(chitatelNodePtr* s) {
+
+	chitatelNodePtr temp;
+	
+	while ((*s) != NULL) {
+		temp = *s;
+		*s = (*s)->next;
+		free(temp);
+	}
+}
